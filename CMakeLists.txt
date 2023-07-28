@@ -1,0 +1,10 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+
+PROJECT(sort-visualizer)
+
+FIND_PACKAGE(SDL2 REQUIRED)
+FIND_PACKAGE(OpenGL REQUIRED)
+
+ADD_EXECUTABLE(sort-visualizer "src/main.c" "src/buffer.c" "src/algorithm.c")
+
+TARGET_LINK_LIBRARIES(sort-visualizer PRIVATE SDL2::SDL2main SDL2::SDL2 OpenGL::GL)
