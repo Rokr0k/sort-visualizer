@@ -67,7 +67,7 @@ int dequeue_queue(queue_t *queue, void *item)
 
   struct node_t *node = queue->front;
   queue->front = queue->front->next;
-  if(queue->front == NULL)
+  if (queue->front == NULL)
   {
     queue->rear = NULL;
   }
@@ -81,7 +81,7 @@ int dequeue_queue(queue_t *queue, void *item)
 void clear_queue(queue_t *queue)
 {
   struct node_t *node = queue->front;
-  while(node != NULL)
+  while (node != NULL)
   {
     struct node_t *next = node->next;
     free(node->data);
@@ -94,7 +94,7 @@ void clear_queue(queue_t *queue)
 void free_queue(queue_t *queue)
 {
   struct node_t *node = queue->front;
-  while(node != NULL)
+  while (node != NULL)
   {
     struct node_t *next = node->next;
     free(node->data);

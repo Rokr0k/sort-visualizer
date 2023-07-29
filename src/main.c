@@ -3,7 +3,71 @@
 #include <Windows.h>
 #endif
 #include <GL/gl.h>
+#include <math.h>
 #include "algorithm.h"
+
+static void hsv2rgb(float h, float s, float v, float *r, float *g, float *b)
+{
+  if (s == 0.0F)
+  {
+    *r = v;
+    *g = v;
+    *b = v;
+    return;
+  }
+
+  int i;
+  float f, p, q, t;
+
+  if (h == 360)
+  {
+    h = 0;
+  }
+  else
+  {
+    h /= 60;
+  }
+
+  i = trunc(h);
+  f = h - i;
+  p = v * (1 - s);
+  q = v * (1 - s * f);
+  t = v * (1 - s * (1 - f));
+
+  switch (i)
+  {
+  case 0:
+    *r = v;
+    *g = t;
+    *b = p;
+    break;
+  case 1:
+    *r = q;
+    *g = v;
+    *b = p;
+    break;
+  case 2:
+    *r = p;
+    *g = v;
+    *b = t;
+    break;
+  case 3:
+    *r = p;
+    *g = q;
+    *b = v;
+    break;
+  case 4:
+    *r = t;
+    *g = p;
+    *b = v;
+    break;
+  case 5:
+    *r = v;
+    *g = p;
+    *b = q;
+    break;
+  }
+}
 
 int main(int argc, char **argv)
 {
@@ -20,6 +84,17 @@ int main(int argc, char **argv)
   queue_t *statusQueue = create_queue(sizeof(status_t));
 
   status_t status;
+
+  enum render_mode_t
+  {
+    SV_RENDER_HOR_BAR,
+    SV_RENDER_HOR_LINE,
+    SV_RENDER_HOR_COLOR,
+    SV_RENDER_PIE_BAR,
+    SV_RENDER_PIE_LINE,
+    SV_RENDER_PIE_COLOR,
+    SV_RENDER_COUNT,
+  } renderMode = SV_RENDER_HOR_BAR;
 
   SDL_bool bQuit = SDL_FALSE;
   SDL_Event event;
@@ -62,6 +137,9 @@ int main(int argc, char **argv)
           }
           reset_buffer(displayBuffer);
           clear_queue(statusQueue);
+          break;
+        case SDLK_TAB:
+          renderMode = (renderMode + 1) % SV_RENDER_COUNT;
           break;
         case SDLK_SPACE:
           clear_queue(statusQueue);
@@ -140,41 +218,209 @@ int main(int argc, char **argv)
     glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glBegin(GL_TRIANGLES);
     size_t i;
     size_t size = size_buffer(displayBuffer);
-    for (i = 0; i < size; ++i)
+    switch (renderMode)
     {
-      int value = get_buffer(displayBuffer, i);
-
-      if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+    case SV_RENDER_HOR_BAR:
+      glBegin(GL_TRIANGLES);
+      for (i = 0; i < size; ++i)
       {
-        switch (status.stat)
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
         {
-        case SV_STAT_COMPARE:
-          glColor3f(0.0F, 1.0F, 0.0F);
-          break;
-        case SV_STAT_SWAP:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
-        case SV_STAT_SET:
-          glColor3f(0.0F, 0.0F, 1.0F);
-          break;
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
         }
-      }
-      else
-      {
-        glColor3f(1.0F, 1.0F, 1.0F);
-      }
+        else
+        {
+          glColor3f(1.0F, 1.0F, 1.0F);
+        }
 
-      glVertex2f(2.0F * i / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
-      glVertex2f(2.0F * i / size - 1.0F, -1.0F);
-      glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
-      glVertex2f(2.0F * i / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
-      glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
-      glVertex2f(2.0F * (i + 1) / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+        glVertex2f(2.0F * i / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+        glVertex2f(2.0F * i / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * i / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+      }
+      glEnd();
+      break;
+    case SV_RENDER_HOR_LINE:
+      glBegin(GL_LINE_STRIP);
+      for (i = 0; i < size; ++i)
+      {
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+        {
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
+        }
+        else
+        {
+          glColor3f(1.0F, 1.0F, 1.0F);
+        }
+
+        glVertex2f(2.0F * (i + 0.5f) / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+      }
+      glEnd();
+      break;
+    case SV_RENDER_HOR_COLOR:
+      glBegin(GL_TRIANGLES);
+      for (i = 0; i < size; ++i)
+      {
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+        {
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
+        }
+        else
+        {
+          float r, g, b;
+          hsv2rgb(360.0F * value / size, 1, 1, &r, &g, &b);
+          glColor3f(r, g, b);
+        }
+
+        glVertex2f(2.0F * i / size - 1.0F, 1.0F);
+        glVertex2f(2.0F * i / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * i / size - 1.0F, 1.0f);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, -1.0F);
+        glVertex2f(2.0F * (i + 1) / size - 1.0F, 1.0F);
+      }
+      glEnd();
+      break;
+    case SV_RENDER_PIE_BAR:
+      glBegin(GL_TRIANGLES);
+      for (i = 0; i < size; ++i)
+      {
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+        {
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
+        }
+        else
+        {
+          glColor3f(1.0F, 1.0F, 1.0F);
+        }
+
+        glVertex2f((value + 1.0F) / size * sinf(M_PI * 2.0F * i / size), (value + 1.0F) / size * cosf(M_PI * 2.0F * i / size));
+        glVertex2f(0.0F, 0.0F);
+        glVertex2f((value + 1.0F) / size * sinf(M_PI * 2.0F * (i + 1) / size), (value + 1.0F) / size * cosf(M_PI * 2.0F * (i + 1) / size));
+      }
+      glEnd();
+      break;
+    case SV_RENDER_PIE_LINE:
+      glBegin(GL_LINE_LOOP);
+      for (i = 0; i < size; ++i)
+      {
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+        {
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
+        }
+        else
+        {
+          glColor3f(1.0F, 1.0F, 1.0F);
+        }
+
+        glVertex2f((value + 1.0F) / size * sinf(M_PI * 2.0F * i / size), (value + 1.0F) / size * cosf(M_PI * 2.0F * i / size));
+      }
+      glEnd();
+      break;
+    case SV_RENDER_PIE_COLOR:
+      glBegin(GL_TRIANGLES);
+      for (i = 0; i < size; ++i)
+      {
+        int value = get_buffer(displayBuffer, i);
+
+        if (status.stat != SV_STAT_NONE && (i == status.idx1 || status.stat != SV_STAT_SET && i == status.idx2))
+        {
+          switch (status.stat)
+          {
+          case SV_STAT_COMPARE:
+            glColor3f(0.0F, 1.0F, 0.0F);
+            break;
+          case SV_STAT_SWAP:
+            glColor3f(1.0F, 0.0F, 0.0F);
+            break;
+          case SV_STAT_SET:
+            glColor3f(0.0F, 0.0F, 1.0F);
+            break;
+          }
+        }
+        else
+        {
+          float r, g, b;
+          hsv2rgb(360.0F * value / size, 1, 1, &r, &g, &b);
+          glColor3f(r, g, b);
+        }
+
+        glVertex2f(sinf(M_PI * 2.0F * i / size), cosf(M_PI * 2.0F * i / size));
+        glVertex2f(0.0F, 0.0F);
+        glVertex2f(sinf(M_PI * 2.0F * (i + 1) / size), cosf(M_PI * 2.0F * (i + 1) / size));
+      }
+      glEnd();
+      break;
     }
-    glEnd();
 
     SDL_GL_SwapWindow(window);
   }
