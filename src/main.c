@@ -4,6 +4,9 @@
 #endif
 #include <GL/gl.h>
 #include <math.h>
+#ifndef M_PI
+#define M_PI (atan(1)*4)
+#endif
 #include "algorithm.h"
 
 static void hsv2rgb(float h, float s, float v, float *r, float *g, float *b)

@@ -7,4 +7,4 @@ FIND_PACKAGE(OpenGL REQUIRED)
 
 ADD_EXECUTABLE(sort-visualizer WIN32 MACOSX_BUNDLE "src/main.c" "src/buffer.c" "src/queue.c" "src/algorithm.c")
 
-TARGET_LINK_LIBRARIES(sort-visualizer PRIVATE SDL2::SDL2main SDL2::SDL2 OpenGL::GL)
+TARGET_LINK_LIBRARIES(sort-visualizer PRIVATE SDL2::SDL2main SDL2::SDL2 OpenGL::GL m)
