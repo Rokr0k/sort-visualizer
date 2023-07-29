@@ -5,72 +5,10 @@
 #include <GL/gl.h>
 #include <math.h>
 #ifndef M_PI
-#define M_PI (atan(1)*4)
+#define M_PI (atan(1) * 4)
 #endif
 #include "algorithm.h"
-
-static void hsv2rgb(float h, float s, float v, float *r, float *g, float *b)
-{
-  if (s == 0.0F)
-  {
-    *r = v;
-    *g = v;
-    *b = v;
-    return;
-  }
-
-  int i;
-  float f, p, q, t;
-
-  if (h == 360)
-  {
-    h = 0;
-  }
-  else
-  {
-    h /= 60;
-  }
-
-  i = trunc(h);
-  f = h - i;
-  p = v * (1 - s);
-  q = v * (1 - s * f);
-  t = v * (1 - s * (1 - f));
-
-  switch (i)
-  {
-  case 0:
-    *r = v;
-    *g = t;
-    *b = p;
-    break;
-  case 1:
-    *r = q;
-    *g = v;
-    *b = p;
-    break;
-  case 2:
-    *r = p;
-    *g = v;
-    *b = t;
-    break;
-  case 3:
-    *r = p;
-    *g = q;
-    *b = v;
-    break;
-  case 4:
-    *r = t;
-    *g = p;
-    *b = v;
-    break;
-  case 5:
-    *r = v;
-    *g = p;
-    *b = q;
-    break;
-  }
-}
+#include "color.h"
 
 int main(int argc, char **argv)
 {
@@ -99,22 +37,24 @@ int main(int argc, char **argv)
     SV_RENDER_COUNT,
   } renderMode = SV_RENDER_HOR_BAR;
 
-  SDL_bool bQuit = SDL_FALSE;
+  SDL_bool paused = SDL_FALSE;
+
+  SDL_bool quit = SDL_FALSE;
   SDL_Event event;
-  while (!bQuit)
+  while (!quit)
   {
     while (SDL_PollEvent(&event))
     {
       if (event.type == SDL_QUIT)
       {
-        bQuit = SDL_TRUE;
+        quit = SDL_TRUE;
       }
       else if (event.type == SDL_KEYDOWN)
       {
         switch (event.key.keysym.sym)
         {
         case SDLK_ESCAPE:
-          bQuit = SDL_TRUE;
+          quit = SDL_TRUE;
           break;
         case SDLK_BACKSPACE:
           reset_buffer(baseBuffer);
@@ -144,9 +84,35 @@ int main(int argc, char **argv)
         case SDLK_TAB:
           renderMode = (renderMode + 1) % SV_RENDER_COUNT;
           break;
-        case SDLK_SPACE:
+        case SDLK_RETURN:
           clear_queue(statusQueue);
           randomize(baseBuffer, statusQueue);
+          break;
+        case SDLK_SPACE:
+          paused = !paused;
+          break;
+        case SDLK_RIGHT:
+          if (paused)
+          {
+            if (dequeue_queue(statusQueue, &status) != -1)
+            {
+              switch (status.stat)
+              {
+              case SV_STAT_COMPARE:
+                break;
+              case SV_STAT_SWAP:
+                swap_buffer(displayBuffer, status.idx1, status.idx2);
+                break;
+              case SV_STAT_SET:
+                set_buffer(displayBuffer, status.idx1, status.idx2);
+                break;
+              }
+            }
+            else
+            {
+              status.stat = SV_STAT_NONE;
+            }
+          }
           break;
         case SDLK_b:
           clear_queue(statusQueue);
@@ -194,23 +160,26 @@ int main(int argc, char **argv)
       }
     }
 
-    if (dequeue_queue(statusQueue, &status) != -1)
+    if (!paused)
     {
-      switch (status.stat)
+      if (dequeue_queue(statusQueue, &status) != -1)
       {
-      case SV_STAT_COMPARE:
-        break;
-      case SV_STAT_SWAP:
-        swap_buffer(displayBuffer, status.idx1, status.idx2);
-        break;
-      case SV_STAT_SET:
-        set_buffer(displayBuffer, status.idx1, status.idx2);
-        break;
+        switch (status.stat)
+        {
+        case SV_STAT_COMPARE:
+          break;
+        case SV_STAT_SWAP:
+          swap_buffer(displayBuffer, status.idx1, status.idx2);
+          break;
+        case SV_STAT_SET:
+          set_buffer(displayBuffer, status.idx1, status.idx2);
+          break;
+        }
       }
-    }
-    else
-    {
-      status.stat = SV_STAT_NONE;
+      else
+      {
+        status.stat = SV_STAT_NONE;
+      }
     }
 
     int w, h;
@@ -286,7 +255,7 @@ int main(int argc, char **argv)
           glColor3f(1.0F, 1.0F, 1.0F);
         }
 
-        glVertex2f(2.0F * (i + 0.5f) / size - 1.0F, 2.0F * (value + 1) / size - 1.0F);
+        glVertex2f(2.0F * i / (size - 1.0F) - 1.0F, 2.0F * value / (size - 1) - 1.0F);
       }
       glEnd();
       break;
@@ -385,7 +354,7 @@ int main(int argc, char **argv)
           glColor3f(1.0F, 1.0F, 1.0F);
         }
 
-        glVertex2f((value + 1.0F) / size * sinf(M_PI * 2.0F * i / size), (value + 1.0F) / size * cosf(M_PI * 2.0F * i / size));
+        glVertex2f(value / (size - 1.0F) * sinf(M_PI * 2.0F * i / size), value / (size - 1.0F) * cosf(M_PI * 2.0F * i / size));
       }
       glEnd();
       break;
