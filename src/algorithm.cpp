@@ -2,63 +2,31 @@
 #include <cstdlib>
 #include <ctime>
 
-static int compare(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t idx1, std::size_t idx2)
+void sv::randomize(sv::Container &c)
 {
-  sv::Status status{idx1, idx2, sv::StatusMode::COMPARE};
-  q.push(status);
-  if (b[idx1] < b[idx2])
-  {
-    return -1;
-  }
-  else if (b[idx1] > b[idx2])
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-static void swap(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t idx1, std::size_t idx2)
-{
-  sv::Status status{idx1, idx2, sv::StatusMode::SWAP};
-  q.push(status);
-  std::swap(b[idx1], b[idx2]);
-}
-
-static void set(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t idx, int value)
-{
-  sv::Status status{idx, static_cast<std::size_t>(value), sv::StatusMode::SET};
-  q.push(status);
-  b[idx] = value;
-}
-
-void sv::randomize(std::vector<int> &b, std::queue<sv::Status> &q)
-{
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
 
   std::srand(std::time(NULL));
 
   for (std::size_t i{0}; i < size - 1; ++i)
   {
     std::size_t j{std::rand() % (size - i) + i};
-    swap(b, q, i, j);
+    c.swap(i, j);
   }
 }
 
-void sv::bubble_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::bubble_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   bool swapped;
   for (std::size_t i{0}; i < size - 1; ++i)
   {
     swapped = false;
     for (std::size_t j{0}; j < size - i - 1; ++j)
     {
-      if (compare(b, q, j, j + 1) > 0)
+      if (c.compare(j, j + 1) > 0)
       {
-        swap(b, q, j, j + 1);
+        c.swap(j, j + 1);
         swapped = true;
       }
     }
@@ -69,9 +37,9 @@ void sv::bubble_sort(std::vector<int> &b, std::queue<sv::Status> &q)
   }
 }
 
-void sv::comb_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::comb_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   std::size_t j{size};
   bool swapped;
   while (j != 1 || swapped)
@@ -84,101 +52,101 @@ void sv::comb_sort(std::vector<int> &b, std::queue<sv::Status> &q)
     swapped = false;
     for (std::size_t i{0}; i < size - j; ++i)
     {
-      if (compare(b, q, i, i + j) > 0)
+      if (c.compare(i, i + j) > 0)
       {
-        swap(b, q, i, i + j);
+        c.swap(i, i + j);
         swapped = true;
       }
     }
   }
 }
 
-void sv::insertion_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::insertion_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   for (std::size_t i{1}; i < size; ++i)
   {
-    for (std::size_t j{i}; j > 0 && compare(b, q, j - 1, j) > 0; --j)
+    for (std::size_t j{i}; j > 0 && c.compare(j - 1, j) > 0; --j)
     {
-      swap(b, q, j - 1, j);
+      c.swap(j - 1, j);
     }
   }
 }
 
-void sv::shell_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::shell_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   for (std::size_t k{size / 2}; k > 0; k /= 2)
   {
     for (std::size_t i{k}; i < size; ++i)
     {
-      for (std::size_t j{i}; j >= k && compare(b, q, j - k, j) > 0; j -= k)
+      for (std::size_t j{i}; j >= k && c.compare(j - k, j) > 0; j -= k)
       {
-        swap(b, q, j - k, j);
+        c.swap(j - k, j);
       }
     }
   }
 }
 
-void sv::selection_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::selection_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   std::size_t i, j, k;
   for (std::size_t i{0}; i < size - 1; ++i)
   {
     k = i;
     for (j = i + 1; j < size; ++j)
     {
-      if (compare(b, q, j, k) < 0)
+      if (c.compare(j, k) < 0)
       {
         k = j;
       }
     }
     if (i != k)
     {
-      swap(b, q, i, k);
+      c.swap(i, k);
     }
   }
 }
 
-static void heapify(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t size, std::size_t root)
+static void heapify(sv::Container &c, std::size_t size, std::size_t root)
 {
   std::size_t i = root;
   std::size_t l = i * 2 + 1;
   std::size_t r = i * 2 + 2;
 
-  if (l < size && compare(b, q, i, l) < 0)
+  if (l < size && c.compare(i, l) < 0)
   {
     i = l;
   }
-  if (r < size && compare(b, q, i, r) < 0)
+  if (r < size && c.compare(i, r) < 0)
   {
     i = r;
   }
   if (i != root)
   {
-    swap(b, q, i, root);
-    heapify(b, q, size, i);
+    c.swap(i, root);
+    heapify(c, size, i);
   }
 }
 
-void sv::heap_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::heap_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
+  std::size_t size{c.base().size()};
   for (std::size_t i{size / 2 - 1}; i > 0; --i)
   {
-    heapify(b, q, size, i);
+    heapify(c, size, i);
   }
-  heapify(b, q, size, 0);
+  heapify(c, size, 0);
 
   for (std::size_t i{size - 1}; i > 0; --i)
   {
-    swap(b, q, 0, i);
-    heapify(b, q, i, 0);
+    c.swap(0, i);
+    heapify(c, i, 0);
   }
 }
 
-static void merge(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l, std::size_t m, std::size_t r)
+static void merge(sv::Container &c, std::size_t l, std::size_t m, std::size_t r)
 {
   std::vector<int> aux(r - l + 1);
 
@@ -187,14 +155,14 @@ static void merge(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l,
   std::size_t k{0};
   while (i <= m && j <= r)
   {
-    if (compare(b, q, i, j) <= 0)
+    if (c.compare(i, j) <= 0)
     {
-      aux[k] = b[i];
+      aux[k] = c.base()[i];
       ++i;
     }
     else
     {
-      aux[k] = b[j];
+      aux[k] = c.base()[j];
       ++j;
     }
     ++k;
@@ -202,99 +170,99 @@ static void merge(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l,
 
   while (i <= m)
   {
-    aux[k] = b[i];
+    aux[k] = c.base()[i];
     ++k;
     ++i;
   }
   while (j <= r)
   {
-    aux[k] = b[j];
+    aux[k] = c.base()[j];
     ++k;
     ++j;
   }
 
   for (i = l; i <= r; ++i)
   {
-    set(b, q, i, aux[i - l]);
+    c.set(i, aux[i - l]);
   }
 }
 
-static void mergeRec(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l, std::size_t r)
+static void mergeRec(sv::Container &c, std::size_t l, std::size_t r)
 {
   if (l < r)
   {
     std::size_t m{l + (r - l) / 2};
 
-    mergeRec(b, q, l, m);
-    mergeRec(b, q, m + 1, r);
-    merge(b, q, l, m, r);
+    mergeRec(c, l, m);
+    mergeRec(c, m + 1, r);
+    merge(c, l, m, r);
   }
 }
 
-void sv::merge_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::merge_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
-  mergeRec(b, q, 0, size - 1);
+  std::size_t size{c.base().size()};
+  mergeRec(c, 0, size - 1);
 }
 
-static std::size_t partition(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l, std::size_t r)
+static std::size_t partition(sv::Container &c, std::size_t l, std::size_t r)
 {
-  swap(b, q, l + (r - l) / 2, r);
+  c.swap(l + (r - l) / 2, r);
   std::size_t p{r};
 
   std::size_t i{l};
   for (std::size_t j{l}; j < r; ++j)
   {
-    if (compare(b, q, j, p) < 0)
+    if (c.compare(j, p) < 0)
     {
-      swap(b, q, i, j);
+      c.swap(i, j);
       ++i;
     }
   }
-  swap(b, q, i, p);
+  c.swap(i, p);
   return i;
 }
 
-static void quickRec(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l, std::size_t r)
+static void quickRec(sv::Container &c, std::size_t l, std::size_t r)
 {
   if (l < r)
   {
-    std::size_t p{partition(b, q, l, r)};
+    std::size_t p{partition(c, l, r)};
 
     if (p > 0)
     {
-      quickRec(b, q, l, p - 1);
+      quickRec(c, l, p - 1);
     }
     if (p < r)
     {
-      quickRec(b, q, p + 1, r);
+      quickRec(c, p + 1, r);
     }
   }
 }
 
-void sv::quick_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::quick_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
-  quickRec(b, q, 0, size - 1);
+  std::size_t size{c.base().size()};
+  quickRec(c, 0, size - 1);
 }
 
-static void stooge(std::vector<int> &b, std::queue<sv::Status> &q, std::size_t l, std::size_t r)
+static void stooge(sv::Container &c, std::size_t l, std::size_t r)
 {
-  if (compare(b, q, l, r) > 0)
+  if (c.compare(l, r) > 0)
   {
-    swap(b, q, l, r);
+    c.swap(l, r);
   }
   if (r - l + 1 > 2)
   {
     std::size_t t{(r - l + 1) / 3};
-    stooge(b, q, l, r - t);
-    stooge(b, q, l + t, r);
-    stooge(b, q, l, r - t);
+    stooge(c, l, r - t);
+    stooge(c, l + t, r);
+    stooge(c, l, r - t);
   }
 }
 
-void sv::stooge_sort(std::vector<int> &b, std::queue<sv::Status> &q)
+void sv::stooge_sort(sv::Container &c)
 {
-  std::size_t size{b.size()};
-  stooge(b, q, 0, size - 1);
+  std::size_t size{c.base().size()};
+  stooge(c, 0, size - 1);
 }
