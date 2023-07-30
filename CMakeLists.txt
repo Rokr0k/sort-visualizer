@@ -8,7 +8,3 @@ FIND_PACKAGE(OpenGL REQUIRED)
 ADD_EXECUTABLE(sort-visualizer WIN32 MACOSX_BUNDLE "src/main.cpp" "src/color.cpp" "src/algorithm.cpp")
 
 TARGET_LINK_LIBRARIES(sort-visualizer PRIVATE SDL2::SDL2main SDL2::SDL2 OpenGL::GL)
-
-IF(UNIX AND NOT APPLE)
-TARGET_LINK_LIBRARIES(sort-visualizer PRIVATE m)
-ENDIF(UNIX AND NOT APPLE)
