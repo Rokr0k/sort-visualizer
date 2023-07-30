@@ -31,11 +31,11 @@ const std::vector<int> &sv::Container::display() const
 
 const sv::Status sv::Container::peekStatus() const
 {
-  if (mStatusQ.empty())
+  if (mQueue.empty())
   {
     return sv::Status{};
   }
-  return mStatusQ.front();
+  return mQueue.front();
 }
 
 const sv::Status sv::Container::popStatus()
@@ -43,7 +43,7 @@ const sv::Status sv::Container::popStatus()
   Status status{peekStatus()};
   if (status.mode != sv::StatusMode::None)
   {
-    mStatusQ.pop();
+    mQueue.pop();
     switch (status.mode)
     {
     case sv::StatusMode::Swap:
@@ -71,15 +71,15 @@ void sv::Container::reset()
     mBase[i] = i;
     mDisplay[i] = i;
   }
-  while (!mStatusQ.empty())
+  while (!mQueue.empty())
   {
-    mStatusQ.pop();
+    mQueue.pop();
   }
 }
 
 int sv::Container::compare(std::size_t idx1, std::size_t idx2)
 {
-  mStatusQ.push(sv::Status{idx1, idx2});
+  mQueue.push(sv::Status{idx1, idx2});
   if (mBase[idx1] < mBase[idx2])
   {
     return -1;
@@ -96,12 +96,12 @@ int sv::Container::compare(std::size_t idx1, std::size_t idx2)
 
 void sv::Container::swap(std::size_t idx1, std::size_t idx2)
 {
-  mStatusQ.push(sv::Status{idx1, idx2, false});
+  mQueue.push(sv::Status{idx1, idx2, false});
   std::swap(mBase[idx1], mBase[idx2]);
 }
 
 void sv::Container::set(std::size_t idx, int value)
 {
-  mStatusQ.push(sv::Status{idx, value});
+  mQueue.push(sv::Status{idx, value});
   mBase[idx] = value;
 }

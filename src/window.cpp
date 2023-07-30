@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "window.hpp"
 #include <SDL.h>
 #include "algorithm.hpp"
 #include "render.hpp"
@@ -10,7 +10,7 @@ sv::Window::Window() : window{nullptr}, gl{nullptr}
   SDL_DisplayMode dm;
   SDL_GetDesktopDisplayMode(0, &dm);
 
-  window = SDL_CreateWindow("Sort Visualizer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dm.w, dm.h, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("Sort Visualizer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, dm.w, dm.h, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
   gl = SDL_GL_CreateContext(window);
 
   if (SDL_GL_SetSwapInterval(-1) < 0)

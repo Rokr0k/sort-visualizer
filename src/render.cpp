@@ -92,10 +92,10 @@ static RGB hsv2rgb(HSV hsv)
 
 void sv::render(RenderMode mode, Status status, const Container &container, int w, int h)
 {
-    glViewport(0, 0, w, h);
+  glViewport(0, 0, w, h);
 
-    glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-    glClear(GL_COLOR_BUFFER_BIT);
+  glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   std::size_t size{container.display().size()};
   switch (mode)

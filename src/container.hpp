@@ -54,7 +54,7 @@ namespace sv
   private:
     std::vector<int> mBase;
     std::vector<int> mDisplay;
-    std::queue<Status> mStatusQ;
+    std::queue<Status> mQueue;
   };
 }
 
