@@ -114,10 +114,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
@@ -149,10 +147,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
@@ -179,10 +175,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
@@ -215,10 +209,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
@@ -247,10 +239,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
@@ -277,10 +267,8 @@ void sv::render(RenderMode mode, Status status, const Container &container, int 
           glColor3f(0.0F, 1.0F, 0.0F);
           break;
         case sv::StatusMode::Swap:
-          glColor3f(1.0F, 0.0F, 0.0F);
-          break;
         case sv::StatusMode::Set:
-          glColor3f(0.0F, 0.0F, 1.0F);
+          glColor3f(1.0F, 0.0F, 0.0F);
           break;
         }
       }
