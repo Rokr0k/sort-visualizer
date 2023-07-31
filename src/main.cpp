@@ -1,3 +1,4 @@
+#include <SDL_main.h>
 #include "window.hpp"
 
 int main(int argc, char **argv)
